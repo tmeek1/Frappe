@@ -104,35 +104,40 @@ public class Lexer {
                     }
                 }
 
-                else if ( state == 3 ) {
-                    if ( digit(sym) ) {
+                else if ( state == 3 ) { //classname
+                    if ( letter(sym) || digit(sym) ) {
                         data += (char) sym;
                         state = 3;
                     }
-                    else if ( sym == '.' ) {
-                        data += (char) sym;
-                        state = 4;
-                    }
-                    else {// done with number token
-                        putBackSymbol( sym );
+                    else {// done with classname token
+                        putBackSymbol(sym);
                         done = true;
                     }
 
                 }
 
                 else if ( state == 4 ) {
-                    if ( digit(sym) ) {
+                    if ((sym != '\\') && (sym != '"')) { //anything but \ and "
                         data += (char) sym;
                         state = 4;
                     }
-                    else {// done with number token
-                        putBackSymbol( sym );
+                    else if (sym == '\\') {
+                        data += (char) sym;
+                        state = 5;
+                    }
+                    else if (sym == '"') {
+                        data += (char) sym;
+                        state = 6;
                         done = true;
+                    }
+                    else {
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
                     }
                 }
 
-                else if ( state == 5 ) {
-                    if ( digit(sym) ) {
+                else if ( state == 5 ) { //no idea what to do
+                    if ( digit(sym)  ) {
                         data += (char) sym;
                         state = 4;
                     }
@@ -142,37 +147,41 @@ public class Lexer {
                     }
                 }
 
-                else if ( state == 6 ) {
-                    if ( (' '<=sym && sym<='~') && sym != '\"' ) {
+                else if ( state == 8 ) { //negative digit
+                    if ( digit(sym) ) {
                         data += (char) sym;
-                        state = 6;
+                        state = 9;
                     }
-                    else if ( sym == '\"' ) {
-                        state = 7;
+                    else {
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                    }
+                }
+
+                else if ( state == 9 ) {//digit
+                    if ( digit(sym) ) {
+                        data += (char) sym;
+                        state = 9;
+                    }
+                    else if (sym == '.') {
+                        data += (char) sym;
+                        state = 10;
+                    }
+
+                    else { // done with digit with no .
+                        putBackSymbol( sym );
                         done = true;
                     }
                 }
 
-                // note: states 7, 8, and 9 are accepting states with
-                //       no arcs out of them, so they are handled
-                //       in the arc going into them
-
-                else if ( state == 10 ) {// saw /, might be single or comment
-                    if ( sym == '*' ) {// starting comment
-                        state = 11;
+                else if ( state == 10 ) { //digit with .
+                    if ( digit(sym) ) {
+                        data += (char) sym;
+                        state = 10;
                     }
-                    else {// saw something other than * after /
-                        putBackSymbol( sym );  // for next token
-                        return new Token( "single", "/" );
-                    }
-                }
-
-                else if ( state == 11 ) {// ignoring most everything
-                    if ( sym == '*' ) {// maybe start of end of comment
-                        state = 12;
-                    }
-                    else {
-                        state = 11;  // ignore it
+                    else { //done with digit with .
+                        putBackSymbol( sym );
+                        done = true;
                     }
                 }
 
