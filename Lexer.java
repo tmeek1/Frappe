@@ -133,8 +133,30 @@ public class Lexer {
                      for (int i=0; i<2 ; i++)
                      {
                          data += (char) sym;
-                         sym = getNextSymbol(); //get next symbol
-                      }
+                        state = 51;
+                    }
+                    else {
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                    }
+                }
+		else if ( state == 51 ) {// check for special char/instuction
+                     if (digit(sym)){
+                     for (int i=0; i<2 ; i++)
+                     {
+                         data += (char) sym;
+                        state = 52;
+                    }
+                    else {
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                    }
+                }
+		else if ( state == 52) {// check for special char/instuction
+                     if (digit(sym)){
+                     for (int i=0; i<2 ; i++)
+                     {
+                         data += (char) sym;
                         state = 4;
                     }
                     else {
@@ -142,7 +164,6 @@ public class Lexer {
                                 + sym + " in state " + state );
                     }
                 }
-
                 else if ( state == 6 ) {
                          putBackSymbol( sym );
                          done = true;
