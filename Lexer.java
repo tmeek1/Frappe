@@ -92,9 +92,8 @@ public class Lexer {
                     }
                 }
 
-                else if ( state == 2 ) {
-                    if () // put tokens here
-                    else ( letter(sym) || digit(sym) ) {
+		else if ( state == 2 ) {
+                    if ( letter(sym) || digit(sym)) {
                         data += (char) sym;
                         state = 2;
                     }
@@ -104,41 +103,60 @@ public class Lexer {
                     }
                 }
 
-                else if ( state == 3 ) { //classname
-                    if ( letter(sym) || digit(sym) ) {
+                else if ( state == 3 ) {
+                    if ( letter(sym) || digit(sym)) {
                         data += (char) sym;
                         state = 3;
                     }
-                    else {// done with classname token
-                        putBackSymbol(sym);
+                    else {// done with Class token
+                        putBackSymbol( sym );
                         done = true;
                     }
 
                 }
 
-                else if ( state == 4 ) {
-                    if ((sym != '\\') && (sym != '"')) { //anything but \ and "
+                else if ( state == 4 ) { // String Token
+                    if ( letter(sym) || digit(sym)) {
                         data += (char) sym;
                         state = 4;
-                    }
-                    else if (sym == '\\') {
-                        data += (char) sym;
+			}
+		    else if(sym =='/'){
                         state = 5;
                     }
-                    else if (sym == '"') {
-                        data += (char) sym;
-                        state = 6;
-                        done = true;
+                    else if(sym =='"'){
+                         state = 6;
+                    }
+                }
+
+		else if ( state == 5 ) {// check for special char/instuction
+                     if (digit(sym)){
+                     for (int i=0; i<2 ; i++)
+                     {
+                         data += (char) sym;
+                        state = 51;
                     }
                     else {
                         error("Error in lexical analysis phase with symbol "
                                 + sym + " in state " + state );
                     }
                 }
-
-                else if ( state == 5 ) { //no idea what to do
-                    if ( digit(sym)  ) {
-                        data += (char) sym;
+		else if ( state == 51 ) {// check for special char/instuction
+                     if (digit(sym)){
+                     for (int i=0; i<2 ; i++)
+                     {
+                         data += (char) sym;
+                        state = 52;
+                    }
+                    else {
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                    }
+                }
+		else if ( state == 52) {// check for special char/instuction
+                     if (digit(sym)){
+                     for (int i=0; i<2 ; i++)
+                     {
+                         data += (char) sym;
                         state = 4;
                     }
                     else {
@@ -146,54 +164,77 @@ public class Lexer {
                                 + sym + " in state " + state );
                     }
                 }
-
-                else if ( state == 8 ) { //negative digit
-                    if ( digit(sym) ) {
-                        data += (char) sym;
-                        state = 9;
+                else if ( state == 6 ) {
+                         putBackSymbol( sym );
+                         done = true;
+                         return new Token( "string", data );
+                       
                     }
-                    else {
+                    
+
+                // note: states 9, and 10 are accepting states with
+                //       no arcs out of them, so they are handled
+                //       in the arc going into them
+
+                else if ( state ==8 ) {// saw - neg. num
+                    if ( digit( sym ) ) {
+                         data += (char) sym;
+                         state = 9; //go to num
+                    }
+                    else {// saw something other than digit after -
                         error("Error in lexical analysis phase with symbol "
                                 + sym + " in state " + state );
                     }
                 }
 
-                else if ( state == 9 ) {//digit
-                    if ( digit(sym) ) {
-                        data += (char) sym;
-                        state = 9;
+                                else if ( state ==9 ) {// saw num
+                    if ( digit( sym ) ) {
+                         data += (char) sym;
+                         state = 9; //go to num
                     }
-                    else if (sym == '.') {
-                        data += (char) sym;
-                        state = 10;
+                    else if(sym == '.'){
+                         data += (char) sym;
+                         state = 10; //go to num
                     }
-
-                    else { // done with digit with no .
-                        putBackSymbol( sym );
-                        done = true;
+                    else {// saw something other than digit after -
+                        putBackSymbol( sym );  // for next token
+                        return new Token( "num" );
                     }
                 }
 
-                else if ( state == 10 ) { //digit with .
-                    if ( digit(sym) ) {
-                        data += (char) sym;
-                        state = 10;
+                else if ( state == 10 ) {// saw /, might be single or comment
+                    if ( digit( sym ) ) {
+                         data += (char) sym;
+                         state = 10; //go to num
                     }
-                    else { //done with digit with .
-                        putBackSymbol( sym );
-                        done = true;
+                    else {// saw something other than * after /
+                        putBackSymbol( sym );  // for next token
+                        return new Token( "num" );
                     }
                 }
 
                 else if ( state == 12 ) {// looking for / to follow *?
                     if ( sym == '/' ) {// comment is done
+                        state = 13;  // continue in this call to getNextToken
+                        data = "";
+                    }
+                    else // saw something other than digit after -
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                }
+                else if ( state == 13 ) {// looking for / to follow *?
+                    if ( sym != 92 ) { // comment is done
+                        state = 13;  // continue in this call to getNextToken
+                        data = "";
+                    }
+                    else if ( sym == 92 ) { // comment is done
                         state = 1;  // continue in this call to getNextToken
                         data = "";
                     }
-                    else {// was not end of comment
-                        state = 11;  // go back to ignoring things
-                    }
-                }
+                    else // saw something other than digit after -
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                  }
 
             }while( !done );
 
@@ -222,7 +263,7 @@ public class Lexer {
             else if ( state == 8 ) {
                 return new Token( "single", data );
             }
-            else if ( state == 9 ) {
+            else if ( state == 14 ) {//pfennel changed  9to 14
                 return new Token( "eof", data );
             }
 
