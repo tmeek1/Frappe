@@ -92,9 +92,8 @@ public class Lexer {
                     }
                 }
 
-                else if ( state == 2 ) {
-                    if () // put tokens here
-                    else ( letter(sym) || digit(sym) ) {
+		else if ( state == 2 ) {
+                    if ( letter(sym) || digit(sym)) {
                         data += (char) sym;
                         state = 2;
                     }
@@ -105,35 +104,37 @@ public class Lexer {
                 }
 
                 else if ( state == 3 ) {
-                    if ( digit(sym) ) {
+                    if ( letter(sym) || digit(sym)) {
                         data += (char) sym;
                         state = 3;
                     }
-                    else if ( sym == '.' ) {
-                        data += (char) sym;
-                        state = 4;
-                    }
-                    else {// done with number token
+                    else {// done with Class token
                         putBackSymbol( sym );
                         done = true;
                     }
 
                 }
 
-                else if ( state == 4 ) {
-                    if ( digit(sym) ) {
+                else if ( state == 4 ) { // String Token
+                    if ( letter(sym) || digit(sym)) {
                         data += (char) sym;
                         state = 4;
+			}
+		    else if(sym =='/'){
+                        state = 5;
                     }
-                    else {// done with number token
-                        putBackSymbol( sym );
-                        done = true;
+                    else if(sym =='"'){
+                         state = 6;
                     }
                 }
 
-                else if ( state == 5 ) {
-                    if ( digit(sym) ) {
-                        data += (char) sym;
+		else if ( state == 5 ) {// check for special char/instuction
+                     if (digit(sym)){
+                     for (int i=0; i<2 ; i++)
+                     {
+                         data += (char) sym;
+                         sym = getNextSymbol(); //get next symbol
+                      }
                         state = 4;
                     }
                     else {
@@ -143,48 +144,76 @@ public class Lexer {
                 }
 
                 else if ( state == 6 ) {
-                    if ( (' '<=sym && sym<='~') && sym != '\"' ) {
-                        data += (char) sym;
-                        state = 6;
+                         putBackSymbol( sym );
+                         done = true;
+                         return new Token( "string", data );
+                       
                     }
-                    else if ( sym == '\"' ) {
-                        state = 7;
-                        done = true;
-                    }
-                }
+                    
 
-                // note: states 7, 8, and 9 are accepting states with
+                // note: states 9, and 10 are accepting states with
                 //       no arcs out of them, so they are handled
                 //       in the arc going into them
 
-                else if ( state == 10 ) {// saw /, might be single or comment
-                    if ( sym == '*' ) {// starting comment
-                        state = 11;
+                else if ( state ==8 ) {// saw - neg. num
+                    if ( digit( sym ) ) {
+                         data += (char) sym;
+                         state = 9; //go to num
                     }
-                    else {// saw something other than * after /
-                        putBackSymbol( sym );  // for next token
-                        return new Token( "single", "/" );
+                    else {// saw something other than digit after -
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
                     }
                 }
 
-                else if ( state == 11 ) {// ignoring most everything
-                    if ( sym == '*' ) {// maybe start of end of comment
-                        state = 12;
+                                else if ( state ==9 ) {// saw num
+                    if ( digit( sym ) ) {
+                         data += (char) sym;
+                         state = 9; //go to num
                     }
-                    else {
-                        state = 11;  // ignore it
+                    else if(sym == '.'){
+                         data += (char) sym;
+                         state = 10; //go to num
+                    }
+                    else {// saw something other than digit after -
+                        putBackSymbol( sym );  // for next token
+                        return new Token( "num" );
+                    }
+                }
+
+                else if ( state == 10 ) {// saw /, might be single or comment
+                    if ( digit( sym ) ) {
+                         data += (char) sym;
+                         state = 10; //go to num
+                    }
+                    else {// saw something other than * after /
+                        putBackSymbol( sym );  // for next token
+                        return new Token( "num" );
                     }
                 }
 
                 else if ( state == 12 ) {// looking for / to follow *?
                     if ( sym == '/' ) {// comment is done
+                        state = 13;  // continue in this call to getNextToken
+                        data = "";
+                    }
+                    else // saw something other than digit after -
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                }
+                else if ( state == 13 ) {// looking for / to follow *?
+                    if ( sym != 92 ) { // comment is done
+                        state = 13;  // continue in this call to getNextToken
+                        data = "";
+                    }
+                    else if ( sym == 92 ) { // comment is done
                         state = 1;  // continue in this call to getNextToken
                         data = "";
                     }
-                    else {// was not end of comment
-                        state = 11;  // go back to ignoring things
-                    }
-                }
+                    else // saw something other than digit after -
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                  }
 
             }while( !done );
 
@@ -213,7 +242,7 @@ public class Lexer {
             else if ( state == 8 ) {
                 return new Token( "single", data );
             }
-            else if ( state == 9 ) {
+            else if ( state == 14 ) {//pfennel changed  9to 14
                 return new Token( "eof", data );
             }
 
