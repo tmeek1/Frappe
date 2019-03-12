@@ -129,12 +129,10 @@ public class Lexer {
                 }
 
 		else if ( state == 5 ) {// check for special char/instuction
-                     if (digit(sym)){
-                     for (int i=0; i<2 ; i++)
-                     {
-                         data += (char) sym;
-                        state = 51;
-                    }
+                     if (digit(sym)) {
+                             data += (char) sym;
+                             state = 51;
+                     }
                     else {
                         error("Error in lexical analysis phase with symbol "
                                 + sym + " in state " + state );
@@ -142,8 +140,6 @@ public class Lexer {
                 }
 		else if ( state == 51 ) {// check for special char/instuction
                      if (digit(sym)){
-                     for (int i=0; i<2 ; i++)
-                     {
                          data += (char) sym;
                         state = 52;
                     }
@@ -153,9 +149,7 @@ public class Lexer {
                     }
                 }
 		else if ( state == 52) {// check for special char/instuction
-                     if (digit(sym)){
-                     for (int i=0; i<2 ; i++)
-                     {
+                     if (digit(sym)) {
                          data += (char) sym;
                         state = 4;
                     }
