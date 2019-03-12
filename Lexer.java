@@ -198,7 +198,7 @@ public class Lexer {
                     }
                     else {// saw something other than digit after -
                         putBackSymbol( sym );  // for next token
-                        return new Token( "num" );
+                        return new Token( "num",data );
                     }
                 }
 
@@ -209,7 +209,7 @@ public class Lexer {
                     }
                     else {// saw something other than * after /
                         putBackSymbol( sym );  // for next token
-                        return new Token( "num" );
+                        return new Token( "num",data );
                     }
                 }
 
