@@ -262,6 +262,7 @@ public class Lexer {
                      else {
                     error("Error in lexical analysis phase with symbol "
                             + sym + " in state " + state );
+                      return null;
                      }
              }
 
