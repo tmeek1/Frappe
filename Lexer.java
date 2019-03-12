@@ -133,8 +133,30 @@ public class Lexer {
                      for (int i=0; i<2 ; i++)
                      {
                          data += (char) sym;
-                         sym = getNextSymbol(); //get next symbol
-                      }
+                        state = 51;
+                    }
+                    else {
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                    }
+                }
+		else if ( state == 51 ) {// check for special char/instuction
+                     if (digit(sym)){
+                     for (int i=0; i<2 ; i++)
+                     {
+                         data += (char) sym;
+                        state = 52;
+                    }
+                    else {
+                        error("Error in lexical analysis phase with symbol "
+                                + sym + " in state " + state );
+                    }
+                }
+		else if ( state == 52) {// check for special char/instuction
+                     if (digit(sym)){
+                     for (int i=0; i<2 ; i++)
+                     {
+                         data += (char) sym;
                         state = 4;
                     }
                     else {
@@ -142,7 +164,6 @@ public class Lexer {
                                 + sym + " in state " + state );
                     }
                 }
-
                 else if ( state == 6 ) {
                          putBackSymbol( sym );
                          done = true;
@@ -177,7 +198,7 @@ public class Lexer {
                     }
                     else {// saw something other than digit after -
                         putBackSymbol( sym );  // for next token
-                        return new Token( "num" );
+                        return new Token( "num",data );
                     }
                 }
 
@@ -188,7 +209,7 @@ public class Lexer {
                     }
                     else {// saw something other than * after /
                         putBackSymbol( sym );  // for next token
-                        return new Token( "num" );
+                        return new Token( "num",data );
                     }
                 }
 
@@ -221,25 +242,42 @@ public class Lexer {
             Token token;
 
             if ( state == 2 ) {
-                // now anything starting with letter is either a
-                // key word or a "var"
-                if ( data.equals("def") || data.equals("end") ||
+                // classes
+                if ( data.equals("class") || data.equals("static") ||
+                        data.equals("for") || data.equals("return") ||
                         data.equals("if") || data.equals("else") ||
-                        data.equals("return")
+                        data.equals("new") || data.equals("void") ||
+                        data.equals("null") || data.equals("this") ||
+                        data.equals("true") || data.equals("false")
                 ) {
                     return new Token( data, "" );
                 }
                 else {
-                    return new Token( "var", data );
+                    return new Token( "name", data );
                 }
             }
-            else if ( state == 3 || state == 4 ) {
+            if ( state == 11 ) {
+            // symbols
+                if ( data.equals("(") || data.equals(")") ||
+                        data.equals("{") || data.equals("}") ||
+                        data.equals(";") || data.equals(",") ||
+                        data.equals(".") || data.equals("=")
+                     ) {
+                     return new Token( data, "" );
+                     }
+                     else {
+                    error("Error in lexical analysis phase with symbol "
+                            + sym + " in state " + state );
+                     }
+             }
+
+            else if ( state == 9 || state == 10 ) {
                 return new Token( "num", data );
             }
-            else if ( state == 7 ) {
+            else if ( state == 6) {
                 return new Token( "string", data );
             }
-            else if ( state == 8 ) {
+            else if ( state == 11 ) {
                 return new Token( "single", data );
             }
             else if ( state == 14 ) {//pfennel changed  9to 14
