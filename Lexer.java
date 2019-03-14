@@ -82,7 +82,7 @@ public class Lexer {
                                 + sym + " in state " + state );
                     }
                 }
-        else if ( state == 2 ) {
+                else if ( state == 2 ) {
                     if ( letter(sym) || digit(sym)) {
                         data += (char) sym;
                         state = 2;
@@ -245,6 +245,9 @@ public class Lexer {
                       return null;
                      }
              }
+            else if ( state == 3 ) {
+                return new Token( "className", data );
+            }
             else if ( state == 9 || state == 10 ) {
                 return new Token( "num", data );
             }
