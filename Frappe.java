@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-public class Corgi {
+public class Frappe {
 
    public static void main(String[] args) throws Exception {
 
