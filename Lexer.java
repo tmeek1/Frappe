@@ -106,27 +106,27 @@ public class Lexer {
                     if ( letter(sym) || digit(sym)) {
                         data += (char) sym;
                         state = 4;
-            }
-            else if(sym =='/'){
+                    }
+                    else if(sym =='/'){
                         state = 5;
                     }
                     else if(sym =='"'){
-                         state = 6;
+                        state = 6;
                     }
                 }
-        else if ( state == 5 ) {// check for special char/instuction
-                     if (digit(sym)) {
-                             escapeCharData = "";
-                             escapeCharData += (char) sym;
-                             state = 51;
-                     }
+                else if ( state == 5 ) {// check for special char/instuction
+                    if (digit(sym)) {
+                        escapeCharData = "";
+                        escapeCharData += (char) sym;
+                        state = 51;
+                    }
                     else {
                         error("Error in lexical analysis phase with symbol "
                                 + sym + " in state " + state );
                     }
                 }
-        else if ( state == 51 ) {// check for special char/instuction
-                     if (digit(sym)){
+                else if ( state == 51 ) {// check for special char/instuction
+                    if (digit(sym)){
                         escapeCharData += (char) sym;
                         state = 52;
                     }
@@ -135,8 +135,8 @@ public class Lexer {
                                 + sym + " in state " + state );
                     }
                 }
-        else if ( state == 52) {// check for special char/instuction
-                     if (digit(sym)) {
+                else if ( state == 52) {// check for special char/instuction
+                    if (digit(sym)) {
                         escapeCharData += (char) sym;
                         data += (char) Integer.parseInt(escapeCharData);
                         state = 4;
@@ -147,33 +147,33 @@ public class Lexer {
                     }
                 }
                 else if ( state == 6 ) {
-                         putBackSymbol( sym );
-                         done = true;
-                         return new Token( "string", data );
-                       
-                    }
-                    
+                    putBackSymbol( sym );
+                    done = true;
+                    return new Token( "string", data );
+
+                }
+
                 // note: states 9, and 10 are accepting states with
                 //       no arcs out of them, so they are handled
                 //       in the arc going into them
                 else if ( state ==8 ) {// saw - neg. num
                     if ( digit( sym ) ) {
-                         data += (char) sym;
-                         state = 9; //go to num
+                        data += (char) sym;
+                        state = 9; //go to num
                     }
                     else {// saw something other than digit after -
                         error("Error in lexical analysis phase with symbol "
                                 + sym + " in state " + state );
                     }
                 }
-                                else if ( state ==9 ) {// saw num
+                else if ( state ==9 ) {// saw num
                     if ( digit( sym ) ) {
-                         data += (char) sym;
-                         state = 9; //go to num
+                        data += (char) sym;
+                        state = 9; //go to num
                     }
                     else if(sym == '.'){
-                         data += (char) sym;
-                         state = 10; //go to num
+                        data += (char) sym;
+                        state = 10; //go to num
                     }
                     else {// saw something other than digit after -
                         putBackSymbol( sym );  // for next token
@@ -182,8 +182,8 @@ public class Lexer {
                 }
                 else if ( state == 10 ) {// saw /, might be single or comment
                     if ( digit( sym ) ) {
-                         data += (char) sym;
-                         state = 10; //go to num
+                        data += (char) sym;
+                        state = 10; //go to num
                     }
                     else {// saw something other than * after /
                         putBackSymbol( sym );  // for next token
@@ -211,7 +211,7 @@ public class Lexer {
                     else // saw something other than digit after -
                         error("Error in lexical analysis phase with symbol "
                                 + sym + " in state " + state );
-                  }
+                }
             }while( !done );
             // generate token depending on stopping state
             Token token;
@@ -231,20 +231,20 @@ public class Lexer {
                 }
             }
             if ( state == 11 ) {
-            // symbols
+                // symbols
                 if ( data.equals("(") || data.equals(")") ||
                         data.equals("{") || data.equals("}") ||
                         data.equals(";") || data.equals(",") ||
                         data.equals(".") || data.equals("=")
-                     ) {
-                     return new Token( "single", data );
-                     }
-                     else {
+                ) {
+                    return new Token( "single", data );
+                }
+                else {
                     error("Error in lexical analysis phase with symbol "
                             + sym + " in state " + state );
-                      return null;
-                     }
-             }
+                    return null;
+                }
+            }
             else if ( state == 3 ) {
                 return new Token( "className", data );
             }
