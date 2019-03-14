@@ -230,7 +230,7 @@ public class Lexer {
                     return new Token( "name", data );
                 }
             }
-            if ( state == 11 ) {
+            else if ( state == 11 ) {
                 // symbols
                 if ( data.equals("(") || data.equals(")") ||
                         data.equals("{") || data.equals("}") ||
